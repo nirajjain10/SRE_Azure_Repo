@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "aksclusterName": {
+      "value": "srecluster"
+    },
+
+    "dnsPrefix": {
+      "value": "sre"
+    },
+
+    "osDiskSizeGB": {
+      "value": 31
+    },
+
+    "agentCount": {
+      "value": 1
+    },
+
+    "agentVMSize": {
+      "value": "standard_b2s"
+    },
+
+    "linuxAdminUsername": {
+      "value": "linuxadmin"
+    },
+    "metricAnnotationsAllowList": {
+      "value": ""
+    },
+    "enableWindowsRecordingRules": {
+      "value": false
+    },
+    "metricLabelsAllowlist": {
+      "value": ""
+    },
+    "grafanaSku": {
+      "value": "Standard"
+    },
+    "monitorworkspacename":{
+      "value" : "monitorwk"
+    },
+    "loganalyticsworkspacename":{
+      "value" : "loganalyticwk"
+    }
+  }
+}
