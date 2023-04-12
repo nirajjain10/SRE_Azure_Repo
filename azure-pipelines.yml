@@ -1,0 +1,49 @@
+trigger:
+- master
+
+name: Deploy Bicep files
+
+variables:
+  vmImageName: 'ubuntu-latest'
+  azureServiceConnection: 'Amit Personal(727de74a-0bea-4ae3-b483-fb78de7cb129)'
+  RG: 'bicepRG'
+  location: 'eastus'
+  templateFile: './AKSPromGrafana.bicep'
+  parameterFile: './AKSPromGrafana.parameters.json'
+  
+  vmImage: $(vmImageName)
+
+steps:
+- task: AzureCLI@2
+  displayName: 'Azure register required services'
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    scriptLocation: 'inlineScript'
+    scriptType: 'bash'
+    inlineScript: |
+      az feature register --namespace Microsoft.ContainerService --name AKS-PrometheusAddonPreview
+      az provider register --namespace Microsoft.OperationsManagement
+      az provider register --namespace Microsoft.OperationalInsights
+
+- task: AzureCLI@2
+  displayName: 'Create Resource Group'
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    scriptLocation: 'inlineScript'
+    scriptType: 'bash'
+    inlineScript: |
+      az group create --name $(RG) --location $(location)
+      ssh-keygen -t rsa -b 4096 -f id_rsa -N ''
+      sshPublicKey=$(cat id_rsa.pub| tr -d '\r')
+      echo "##vso[task.setvariable variable=sshPublicKeyVariable]$sshPublicKey"
+      echo "SSH public key: $sshPublicKey"
+
+- task: AzureCLI@2
+  displayName: 'Deploy Azure Resources'
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    scriptLocation: 'inlineScript'
+    scriptType: 'bash'
+    inlineScript: |
+      echo "SSH public key variable: $(sshPublicKeyVariable)"
+      az deployment group create --name "SREDEPLOY" --resource-group $(RG) --template-file $(templateFile) --parameters $(parameterFile) sshRSAPublicKey="$(sshPublicKeyVariable)"
